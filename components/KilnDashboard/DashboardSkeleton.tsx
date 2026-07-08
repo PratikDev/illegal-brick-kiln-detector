@@ -24,7 +24,32 @@ export function DashboardSkeleton() {
 							<Skeleton className="h-16 w-full" />
 							<Skeleton className="h-16 w-full" />
 						</div>
-						<Skeleton className="h-72 w-full" />
+					</CardContent>
+				</Card>
+				<Card>
+					<CardHeader className="gap-3 sm:grid-cols-[1fr_auto]">
+						<div className="flex flex-col gap-2">
+							<Skeleton className="h-5 w-44" />
+							<Skeleton className="h-4 w-64" />
+						</div>
+						<div className="flex flex-col gap-2 sm:flex-row">
+							<Skeleton className="h-8 w-full sm:w-32" />
+							<Skeleton className="h-8 w-full sm:w-36" />
+						</div>
+					</CardHeader>
+					<CardContent>
+						<div className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.75fr)]">
+							<Skeleton className="min-h-96 w-full xl:min-h-[560px]" />
+							<div className="flex flex-col gap-4">
+								<div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-2">
+									<Skeleton className="h-16 w-full" />
+									<Skeleton className="h-16 w-full" />
+									<Skeleton className="h-16 w-full" />
+									<Skeleton className="h-16 w-full" />
+								</div>
+								<Skeleton className="h-80 w-full" />
+							</div>
+						</div>
 					</CardContent>
 				</Card>
 			</div>
