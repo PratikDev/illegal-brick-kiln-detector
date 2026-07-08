@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -141,4 +142,39 @@
   html {
     @apply font-mono;
     }
+}
+
+@layer components {
+  .kiln-map {
+    height: 100%;
+    width: 100%;
+  }
+
+  .kiln-map .leaflet-container {
+    height: 100%;
+    width: 100%;
+    border-radius: inherit;
+    background: var(--muted);
+    font-family: inherit;
+  }
+
+  .kiln-map-marker-high {
+    stroke: var(--confidence-high);
+    fill: var(--confidence-high);
+  }
+
+  .kiln-map-marker-medium {
+    stroke: var(--confidence-medium);
+    fill: var(--confidence-medium);
+  }
+
+  .kiln-map-marker-low {
+    stroke: var(--confidence-low);
+    fill: var(--confidence-low);
+  }
+
+  .kiln-map-marker-selected {
+    filter: drop-shadow(0 0 0.45rem var(--ring));
+    stroke: var(--foreground);
+  }
 }
