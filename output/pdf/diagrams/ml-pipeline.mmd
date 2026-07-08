@@ -1,0 +1,20 @@
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "25px", "fontFamily": "Arial", "primaryTextColor": "#0c2544"}, "themeCSS": ".nodeLabel, .edgeLabel, .labelBkg { font-size: 25px !important; }"}}%%
+flowchart LR
+  A[SentinelKilnDB<br/>Hugging Face] --> B[Inspect Parquet<br/>train, val, test]
+  B --> C[Write PNG tiles<br/>and OBB labels]
+  C --> D[South Asia<br/>train and val]
+  C --> E[Bangladesh<br/>val subset]
+  D --> F[Fine tune<br/>YOLO11n-OBB]
+  F --> G[best.pt<br/>checkpoint]
+  G --> H[Export LiteRT<br/>best.tflite]
+  H --> I[Prediction API<br/>decode and NMS]
+  I --> J[Review dashboard<br/>map, list, sheet]
+  E --> K[Bangladesh<br/>eval target]
+  F --> K
+
+  classDef source fill:#e8f3ff,stroke:#2d6cdf,color:#0c2544;
+  classDef train fill:#fff4df,stroke:#c97800,color:#3f2600;
+  classDef deploy fill:#e8f8ef,stroke:#2f855a,color:#123524;
+  class A,B,C source;
+  class D,E,F,G,K train;
+  class H,I,J deploy;

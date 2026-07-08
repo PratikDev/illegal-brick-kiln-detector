@@ -1,0 +1,113 @@
+\documentclass[9pt]{article}
+\usepackage[a4paper,margin=0.46in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{array}
+
+\definecolor{cardblue}{HTML}{174A7C}
+\hypersetup{colorlinks=true,urlcolor=cardblue,linkcolor=cardblue}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.22em}
+\setlength{\columnsep}{0.3in}
+\setlist[itemize]{leftmargin=1.05em,itemsep=0.15em,topsep=0.18em}
+\renewcommand{\arraystretch}{1.08}
+\pagenumbering{gobble}
+
+\begin{document}
+\fontsize{8.25}{9.25}\selectfont
+\begin{center}
+{\large \textbf{Model and Data Card: Illegal Brick Kiln Detector}}\\[-0.2em]
+{\small Fine-tuned YOLO11n-OBB for satellite brick kiln detection in Bangladesh review workflows}\\
+{\small Team PTSD \textbar{} AI Hackathon SciBlitz AI Challenge 2026}\\
+{\small Samonwita Sarker (Leader), Protik Dev, Rotna Dipika Debnath, Touhidul Alam Seyam}
+\end{center}
+\vspace{-0.25em}
+
+\begin{multicols}{2}
+\textbf{Model details}\\[0.05em]
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+Field & Value \\
+\midrule
+Model & YOLO11n-OBB, pretrained \texttt{yolo11n-obb.pt} \\
+Provider & Ultralytics pretrained checkpoint, fine-tuned in project notebook \\
+Artifacts & \texttt{model/best.pt} (5.5 MB), \texttt{model/best.tflite} (10 MB) \\
+Task & Oriented object detection for brick kiln review \\
+Classes & CFCBK, FCBK, Zigzag \\
+License & Verify dataset and model licenses from the original providers before public redistribution \\
+\bottomrule
+\end{tabularx}
+
+\textbf{Training data}\\[0.05em]
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+Field & Value \\
+\midrule
+Dataset & SentinelKilnDB from Hugging Face, SustainabilityLabIITGN/SentinelKilnDB \\
+Format & Parquet source converted to PNG tiles plus YOLO-OBB labels \\
+Split used & Full South Asia train/val; Bangladesh-only validation subset from val \\
+Counts & 71,856 train tiles, 23,952 val tiles, 3,929 Bangladesh val tiles \\
+Class counts & Train labels: CFCBK 2,032; FCBK 34,292; Zigzag 27,463 \\
+\bottomrule
+\end{tabularx}
+
+\textbf{Training setup}\\[0.05em]
+\begin{tabularx}{\linewidth}{@{}lY@{}}
+\toprule
+Field & Value \\
+\midrule
+Notebook & \texttt{yolo-obb-n (1).ipynb} \\
+Image size & 128 px in completed notebook run \\
+Epochs/batch & 50 epochs, batch 256 \\
+Augmentations & Rotation, horizontal flip, vertical flip, scale, translate, mosaic \\
+Export & LiteRT via \texttt{scripts/export-litert.py}; input \texttt{(1,3,256,256)}, output \texttt{(1,8,1344)} \\
+\bottomrule
+\end{tabularx}
+
+\columnbreak
+
+\textbf{Validation results}\\[0.05em]
+\begin{tabularx}{\linewidth}{@{}lrrrr@{}}
+\toprule
+Class & P & R & mAP50 & mAP50-95 \\
+\midrule
+All & 0.651 & 0.627 & 0.643 & 0.359 \\
+CFCBK & 0.661 & 0.572 & 0.592 & 0.374 \\
+FCBK & 0.618 & 0.672 & 0.634 & 0.330 \\
+Zigzag & 0.675 & 0.636 & 0.702 & 0.375 \\
+\bottomrule
+\end{tabularx}
+
+\textbf{Intended use}\\[-0.2em]
+\begin{itemize}
+  \item Triage likely brick kiln locations from satellite crops.
+  \item Review map markers, confidence, tile evidence, and OBB overlays.
+  \item Support environmental monitoring. It is not a standalone enforcement system.
+\end{itemize}
+
+\textbf{Known limitations}\\[-0.2em]
+\begin{itemize}
+  \item Saved outputs include overall validation metrics, not final Bangladesh-only metrics.
+  \item Demo tile coverage is limited to five districts and ten seeded tiles per district.
+  \item Upload predictions without georeferenced tiles have approximate coordinates.
+  \item Class imbalance is substantial; FCBK dominates the train labels.
+  \item Visual false positives can occur for industrial roofs, roads, fields, and kiln-like shapes.
+\end{itemize}
+
+\textbf{Ethical and deployment concerns}\\[-0.2em]
+\begin{itemize}
+  \item Human review is required before enforcement, public accusation, or site-level publication.
+  \item Satellite imagery and model outputs can be outdated; field validation should confirm sensitive findings.
+  \item Thresholds should match the review context: high recall for screening, higher precision for action.
+  \item Dataset and pretrained model licenses must be checked before external release or commercial reuse.
+\end{itemize}
+\end{multicols}
+\end{document}
