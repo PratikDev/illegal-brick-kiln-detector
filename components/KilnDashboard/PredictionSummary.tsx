@@ -18,14 +18,16 @@ export function PredictionSummary({ summary }: PredictionSummaryProps) {
 	];
 
 	return (
-		<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-			{stats.map((stat) => (
-				<div key={stat.label} className="rounded-lg border bg-background p-3">
-					<p className="text-xs text-muted-foreground">{stat.label}</p>
-					<p className="font-heading text-2xl font-medium">{stat.value}</p>
-				</div>
-			))}
-			<div className="flex flex-wrap gap-2 sm:col-span-2 lg:col-span-4">
+		<div className="flex flex-col gap-3">
+			<div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-2">
+				{stats.map((stat) => (
+					<div key={stat.label} className="rounded-lg border bg-background p-3">
+						<p className="text-xs text-muted-foreground">{stat.label}</p>
+						<p className="font-heading text-xl font-medium">{stat.value}</p>
+					</div>
+				))}
+			</div>
+			<div className="flex flex-wrap gap-2">
 				<Badge variant="outline">CFCBK {summary.classes.CFCBK}</Badge>
 				<Badge variant="outline">FCBK {summary.classes.FCBK}</Badge>
 				<Badge variant="outline">Zigzag {summary.classes.Zigzag}</Badge>

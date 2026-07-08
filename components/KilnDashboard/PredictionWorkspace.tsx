@@ -1,7 +1,9 @@
-import * as React from "react";
-import { RiImageAddLine, RiPlayLine, RiRefreshLine } from "@remixicon/react";
+"use client";
 
-import type { Doc } from "@/convex/_generated/dataModel";
+import { RiImageAddLine, RiPlayLine, RiRefreshLine } from "@remixicon/react";
+import dynamic from "next/dynamic";
+import * as React from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,20 +23,32 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import type {
+	Prediction,
+	PredictionSummary as PredictionSummaryData,
+} from "@/lib/prediction-api";
+import type { Region } from "@/lib/regions";
+import { DetectionDetailSheet } from "./DetectionDetailSheet";
 import { PredictionList } from "./PredictionList";
 import { PredictionSummary } from "./PredictionSummary";
-import { DetectionDetailSheet } from "./DetectionDetailSheet";
 import { usePredictionWorkspace } from "./use-prediction-workspace";
 
+const KilnMap = dynamic(
+	() => import("@/components/KilnMap").then((module) => module.KilnMap),
+	{
+		ssr: false,
+		loading: () => <MapSkeleton />,
+	},
+);
+
 type PredictionWorkspaceProps = {
-	region: Doc<"regions">;
+	region: Region;
 };
 
 export function PredictionWorkspace({ region }: PredictionWorkspaceProps) {
 	const workspace = usePredictionWorkspace(region);
 	const uploadInputId = React.useId();
-	const predictions = workspace.response?.predictions ?? [];
-	const hasPredictions = predictions.length > 0;
+	const hasPredictions = workspace.predictions.length > 0;
 	const isLoading = workspace.status === "loading";
 
 	return (
@@ -67,7 +81,10 @@ export function PredictionWorkspace({ region }: PredictionWorkspaceProps) {
 								}
 							}}
 						/>
-						<Button onClick={workspace.runPrediction} disabled={isLoading}>
+						<Button
+							onClick={workspace.runPrediction}
+							disabled={isLoading}
+						>
 							{isLoading ? (
 								<RiRefreshLine data-icon="inline-start" />
 							) : (
@@ -82,38 +99,44 @@ export function PredictionWorkspace({ region }: PredictionWorkspaceProps) {
 						<div className="flex flex-wrap items-center gap-2">
 							<Badge variant="outline">{workspace.response.region}</Badge>
 							<p className="text-sm text-muted-foreground">
-								Generated {new Date(workspace.response.generatedAt).toLocaleString()}
+								Generated{" "}
+								{new Date(workspace.response.generatedAt).toLocaleString()}
 							</p>
 						</div>
 					) : null}
 
-					{isLoading ? <PredictionLoadingState /> : null}
-					{workspace.status === "error" ? (
-						<PredictionErrorState message={workspace.errorMessage} />
-					) : null}
-					{workspace.status === "idle" ? <PredictionIdleState /> : null}
-					{workspace.status === "success" && !hasPredictions ? (
-						<PredictionEmptyState />
-					) : null}
-					{hasPredictions ? (
-						<div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
-							<PredictionSummary summary={workspace.summary} />
-							<div className="flex flex-col gap-3">
-								<div>
-									<h3 className="font-heading text-base font-medium">
-										Detections
-									</h3>
-									<p className="text-sm text-muted-foreground">
-										Select a detection to inspect tile evidence.
-									</p>
-								</div>
-								<PredictionList
-									predictions={predictions}
+					<div className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.75fr)]">
+						<div className="min-h-96 overflow-hidden rounded-lg border bg-muted xl:min-h-140">
+							{isLoading ? (
+								<MapSkeleton />
+							) : (
+								<KilnMap
+									region={region}
+									predictions={workspace.predictions}
+									selectedPredictionId={workspace.selectedPredictionId}
 									onSelectPrediction={workspace.selectPrediction}
 								/>
-							</div>
+							)}
 						</div>
-					) : null}
+						<div className="flex min-w-0 flex-col gap-4">
+							{isLoading ? <PredictionLoadingState /> : null}
+							{workspace.status === "error" ? (
+								<PredictionErrorState message={workspace.errorMessage} />
+							) : null}
+							{workspace.status === "idle" ? <PredictionIdleState /> : null}
+							{workspace.status === "success" && !hasPredictions ? (
+								<PredictionEmptyState />
+							) : null}
+							{hasPredictions ? (
+								<PredictionReviewPanel
+									predictions={workspace.predictions}
+									selectedPredictionId={workspace.selectedPredictionId}
+									summary={workspace.summary}
+									onSelectPrediction={workspace.selectPrediction}
+								/>
+							) : null}
+						</div>
+					</div>
 				</CardContent>
 			</Card>
 
@@ -129,16 +152,51 @@ export function PredictionWorkspace({ region }: PredictionWorkspaceProps) {
 	);
 }
 
+function MapSkeleton() {
+	return <Skeleton className="h-full min-h-96 w-full xl:min-h-140" />;
+}
+
+function PredictionReviewPanel({
+	predictions,
+	selectedPredictionId,
+	summary,
+	onSelectPrediction,
+}: {
+	predictions: Prediction[];
+	selectedPredictionId: string | null;
+	summary: PredictionSummaryData;
+	onSelectPrediction: (prediction: Prediction) => void;
+}) {
+	return (
+		<>
+			<PredictionSummary summary={summary} />
+			<div className="flex flex-col gap-3">
+				<div>
+					<h3 className="font-heading text-base font-medium">Detections</h3>
+					<p className="text-sm text-muted-foreground">
+						Select a detection to inspect tile evidence.
+					</p>
+				</div>
+				<PredictionList
+					predictions={predictions}
+					selectedPredictionId={selectedPredictionId}
+					onSelectPrediction={onSelectPrediction}
+				/>
+			</div>
+		</>
+	);
+}
+
 function PredictionLoadingState() {
 	return (
 		<div className="flex flex-col gap-4">
-			<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-				<Skeleton className="h-16" />
-				<Skeleton className="h-16" />
-				<Skeleton className="h-16" />
-				<Skeleton className="h-16" />
+			<div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-2">
+				<Skeleton className="h-16 w-full" />
+				<Skeleton className="h-16 w-full" />
+				<Skeleton className="h-16 w-full" />
+				<Skeleton className="h-16 w-full" />
 			</div>
-			<Skeleton className="h-80" />
+			<Skeleton className="h-80 w-full" />
 		</div>
 	);
 }
@@ -149,8 +207,7 @@ function PredictionIdleState() {
 			<EmptyHeader>
 				<EmptyTitle>No prediction run yet</EmptyTitle>
 				<EmptyDescription>
-					Run seeded district tiles or upload a satellite crop. Uploads are
-					processed transiently and are not saved.
+					Run seeded district tiles or upload a satellite crop.
 				</EmptyDescription>
 			</EmptyHeader>
 		</Empty>
@@ -169,8 +226,7 @@ function PredictionEmptyState() {
 			<EmptyContent>
 				<Separator />
 				<p className="text-muted-foreground">
-					Try another seeded district, lower the model threshold, or upload a
-					clearer satellite crop.
+					The model returned an empty prediction set for this district.
 				</p>
 			</EmptyContent>
 		</Empty>

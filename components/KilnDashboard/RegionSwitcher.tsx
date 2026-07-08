@@ -1,4 +1,3 @@
-import type { Doc, Id } from "@/convex/_generated/dataModel";
 import {
 	Select,
 	SelectContent,
@@ -7,13 +6,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-
-type Region = Doc<"regions">;
+import type { Region, RegionId } from "@/lib/regions";
 
 type RegionSwitcherProps = {
 	regions: Region[];
-	selectedRegionId: Id<"regions"> | null;
-	onSelectedRegionIdChange: (regionId: Id<"regions">) => void;
+	selectedRegionId: RegionId | null;
+	onSelectedRegionIdChange: (regionId: RegionId) => void;
 };
 
 export function RegionSwitcher({
@@ -25,7 +23,7 @@ export function RegionSwitcher({
 		<Select
 			value={selectedRegionId ?? undefined}
 			onValueChange={(regionId) =>
-				onSelectedRegionIdChange(regionId as Id<"regions">)
+				onSelectedRegionIdChange(regionId as RegionId)
 			}
 			disabled={regions.length === 0}
 		>
@@ -35,7 +33,7 @@ export function RegionSwitcher({
 			<SelectContent>
 				<SelectGroup>
 					{regions.map((region) => (
-						<SelectItem key={region._id} value={region._id}>
+						<SelectItem key={region.id} value={region.id}>
 							{region.name}
 						</SelectItem>
 					))}

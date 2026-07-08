@@ -41,7 +41,7 @@ export async function fetchRegionPredictions(
 	const response = await fetch(`/predict?region=${encodeURIComponent(regionSlug)}`);
 
 	if (!response.ok) {
-		throw new Error(`Prediction request failed with status ${response.status}`);
+		throw new Error(await parseApiError(response));
 	}
 
 	const data: unknown = await response.json();
@@ -65,7 +65,7 @@ export async function predictUploadedImage({
 	});
 
 	if (!response.ok) {
-		throw new Error(`Upload prediction failed with status ${response.status}`);
+		throw new Error(await parseApiError(response));
 	}
 
 	const data: unknown = await response.json();
@@ -164,7 +164,10 @@ function parsePrediction(value: unknown): Prediction {
 		id: requireString(prediction.id, "prediction.id"),
 		lat: requireNumber(prediction.lat, "prediction.lat"),
 		lon: requireNumber(prediction.lon, "prediction.lon"),
-		confidence: requireNumber(prediction.confidence, "prediction.confidence"),
+		confidence: requireConfidence(
+			prediction.confidence,
+			"prediction.confidence",
+		),
 		label: prediction.label === "no_kiln" ? "no_kiln" : "kiln",
 		tileUrl: requireString(prediction.tileUrl, "prediction.tileUrl"),
 		...(className ? { className } : {}),
@@ -217,6 +220,36 @@ function requireNumber(value: unknown, field: string): number {
 	return value;
 }
 
+function requireConfidence(value: unknown, field: string): number {
+	const confidence = requireNumber(value, field);
+
+	if (confidence < 0 || confidence > 1) {
+		throw new Error(`${field} must be between 0 and 1`);
+	}
+
+	return confidence;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null;
+	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+async function parseApiError(response: Response): Promise<string> {
+	try {
+		const data: unknown = await response.json();
+
+		if (isRecord(data)) {
+			if (typeof data.message === "string" && data.message.length > 0) {
+				return data.message;
+			}
+
+			if (typeof data.error === "string" && data.error.length > 0) {
+				return data.error;
+			}
+		}
+	} catch {
+		// Fall through to the status-based message when the body is not JSON.
+	}
+
+	return `Prediction request failed with status ${response.status}`;
 }

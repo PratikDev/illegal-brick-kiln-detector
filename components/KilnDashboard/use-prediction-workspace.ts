@@ -1,6 +1,5 @@
 import * as React from "react";
 
-import type { Doc } from "@/convex/_generated/dataModel";
 import {
 	fetchRegionPredictions,
 	predictUploadedImage,
@@ -8,6 +7,7 @@ import {
 	type Prediction,
 	summarizePredictions,
 } from "@/lib/prediction-api";
+import type { Region } from "@/lib/regions";
 
 type PredictionStatus = "idle" | "loading" | "success" | "error";
 
@@ -15,7 +15,9 @@ type UsePredictionWorkspaceResult = {
 	status: PredictionStatus;
 	response: PredictResponse | null;
 	errorMessage: string | null;
+	selectedPredictionId: string | null;
 	selectedPrediction: Prediction | null;
+	predictions: Prediction[];
 	summary: ReturnType<typeof summarizePredictions>;
 	runPrediction: () => Promise<void>;
 	runUploadPrediction: (file: File) => Promise<void>;
@@ -38,7 +40,7 @@ const initialRequestState: RequestState = {
 };
 
 export function usePredictionWorkspace(
-	region: Doc<"regions"> | null,
+	region: Region | null,
 ): UsePredictionWorkspaceResult {
 	const [requestState, setRequestState] =
 		React.useState<RequestState>(initialRequestState);
@@ -46,7 +48,7 @@ export function usePredictionWorkspace(
 		string | null
 	>(null);
 
-	const isCurrentRegion = requestState.regionId === (region?._id ?? null);
+	const isCurrentRegion = requestState.regionId === (region?.id ?? null);
 	const status = isCurrentRegion ? requestState.status : "idle";
 	const response = isCurrentRegion ? requestState.response : null;
 	const errorMessage = isCurrentRegion ? requestState.errorMessage : null;
@@ -68,7 +70,7 @@ export function usePredictionWorkspace(
 		}
 
 		setRequestState({
-			regionId: region._id,
+			regionId: region.id,
 			status: "loading",
 			response: null,
 			errorMessage: null,
@@ -78,14 +80,14 @@ export function usePredictionWorkspace(
 		try {
 			const result = await fetchRegionPredictions(region.slug);
 			setRequestState({
-				regionId: region._id,
+				regionId: region.id,
 				status: "success",
 				response: result,
 				errorMessage: null,
 			});
 		} catch (error) {
 			setRequestState({
-				regionId: region._id,
+				regionId: region.id,
 				status: "error",
 				response: null,
 				errorMessage:
@@ -101,7 +103,7 @@ export function usePredictionWorkspace(
 			}
 
 			setRequestState({
-				regionId: region._id,
+				regionId: region.id,
 				status: "loading",
 				response: null,
 				errorMessage: null,
@@ -115,14 +117,14 @@ export function usePredictionWorkspace(
 					imageDataUrl,
 				});
 				setRequestState({
-					regionId: region._id,
+					regionId: region.id,
 					status: "success",
 					response: result,
 					errorMessage: null,
 				});
 			} catch (error) {
 				setRequestState({
-					regionId: region._id,
+					regionId: region.id,
 					status: "error",
 					response: null,
 					errorMessage:
@@ -137,7 +139,9 @@ export function usePredictionWorkspace(
 		status,
 		response,
 		errorMessage,
+		selectedPredictionId,
 		selectedPrediction,
+		predictions,
 		summary,
 		runPrediction,
 		runUploadPrediction,

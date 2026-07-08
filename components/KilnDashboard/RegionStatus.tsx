@@ -1,10 +1,10 @@
-import type { Doc } from "@/convex/_generated/dataModel";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatLastUpdated } from "@/lib/format";
+import type { Region } from "@/lib/regions";
 
 type RegionStatusProps = {
-	region: Doc<"regions"> | null;
+	region: Region | null;
 };
 
 function formatCoordinate(value: number): string {
