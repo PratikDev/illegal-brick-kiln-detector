@@ -7,8 +7,10 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
-import type { Prediction } from "@/lib/prediction-api";
-import { formatConfidence } from "@/lib/prediction-api";
+import {
+	formatConfidence,
+	type Prediction,
+} from "@/lib/prediction-api";
 import { PredictionTilePreview } from "./PredictionTilePreview";
 
 type DetectionDetailSheetProps = {
@@ -20,6 +22,10 @@ export function DetectionDetailSheet({
 	prediction,
 	onOpenChange,
 }: DetectionDetailSheetProps) {
+	const boxLabel = prediction?.box
+		? `${prediction.box.type.toUpperCase()} / ${prediction.box.imageSize}px`
+		: "Unavailable";
+
 	return (
 		<Sheet open={prediction !== null} onOpenChange={onOpenChange}>
 			<SheetContent className="w-full overflow-y-auto sm:max-w-md">
@@ -49,6 +55,15 @@ export function DetectionDetailSheet({
 						<dl className="grid gap-3 text-sm">
 							<DetailRow label="Detection ID" value={prediction.id} />
 							<DetailRow
+								label="Class"
+								value={prediction.className ?? "Unclassified"}
+							/>
+							<DetailRow label="Label" value={prediction.label} />
+							<DetailRow
+								label="Confidence"
+								value={formatConfidence(prediction.confidence)}
+							/>
+							<DetailRow
 								label="Coordinates"
 								value={`${prediction.lat.toFixed(6)}, ${prediction.lon.toFixed(6)}`}
 							/>
@@ -56,6 +71,7 @@ export function DetectionDetailSheet({
 								label="Tile source"
 								value={prediction.tileUrl || "Unavailable"}
 							/>
+							<DetailRow label="Box" value={boxLabel} />
 						</dl>
 					</div>
 				) : null}
