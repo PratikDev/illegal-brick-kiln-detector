@@ -14,11 +14,6 @@ Use the package scripts in `package.json`:
 - `bun run start` serves the production build after `build`.
 - `bun run lint` runs ESLint with Next.js core web vitals and TypeScript rules.
 - `bun run shadd <component>` adds shadcn components through `bunx --bun shadcn@latest add`.
-- `bun run convex` runs Convex dev server once.
-- `bun run convex:gen` generates Convex client code.
-- `bun run convex:watch` runs Convex dev server in watch mode.
-- `bun run convex:deploy` deploys the Convex backend.
-- `bun run convex:dash` opens the Convex dashboard.
 
 ## Coding Style & Naming Conventions
 
@@ -35,26 +30,11 @@ Keep commits atomic: commit only the files you touched and list each path explic
 - Always check the changed files by `git status` before committing. Never commit files from the thread context.
 - Never change any file content before committing.
 - Never include all changes in a single commit. Split them by actual purposes.
-- PRs should explain user-visible impact, list Convex/schema or config changes, and link related issues. Pull requests should include a short summary, validation steps, and linked issues when relevant. Note any Convex schema, environment, or migration impact explicitly.
+- PRs should explain user-visible impact and link related issues. Pull requests should include a short summary, validation steps, and linked issues when relevant. Note any prediction API, environment, or model impact explicitly.
 
 ## Security & Configuration Tips
 
 Do not commit secrets or local environment files. Keep generated output such as `.next/`, `out/`, and `build/` out of source control. Treat `lib/mock-data.ts` as development data unless a backend integration explicitly replaces it.
-
-<!-- convex-ai-start -->
-
-This project uses [Convex](https://convex.dev) as its backend.
-
-When working on Convex code, **always read
-`convex/_generated/ai/guidelines.md` first** for important guidelines on
-how to correctly use Convex APIs and patterns. The file contains rules that
-override what you may have learned about Convex from training data.
-
-Convex agent skills for common tasks can be installed by running
-`npx convex ai-files install`.
-
-<!-- convex-ai-end -->
-
 
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know

@@ -1,12 +1,9 @@
 "use client";
 
-import * as React from "react";
-import dynamic from "next/dynamic";
 import { RiImageAddLine, RiPlayLine, RiRefreshLine } from "@remixicon/react";
+import dynamic from "next/dynamic";
+import * as React from "react";
 
-import type { PredictionSummary as PredictionSummaryData } from "@/lib/prediction-api";
-import type { Prediction } from "@/lib/prediction-api";
-import type { Region } from "@/lib/regions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,9 +23,14 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import type {
+	Prediction,
+	PredictionSummary as PredictionSummaryData,
+} from "@/lib/prediction-api";
+import type { Region } from "@/lib/regions";
+import { DetectionDetailSheet } from "./DetectionDetailSheet";
 import { PredictionList } from "./PredictionList";
 import { PredictionSummary } from "./PredictionSummary";
-import { DetectionDetailSheet } from "./DetectionDetailSheet";
 import { usePredictionWorkspace } from "./use-prediction-workspace";
 
 const KilnMap = dynamic(
@@ -79,7 +81,10 @@ export function PredictionWorkspace({ region }: PredictionWorkspaceProps) {
 								}
 							}}
 						/>
-						<Button onClick={workspace.runPrediction} disabled={isLoading}>
+						<Button
+							onClick={workspace.runPrediction}
+							disabled={isLoading}
+						>
 							{isLoading ? (
 								<RiRefreshLine data-icon="inline-start" />
 							) : (
@@ -94,13 +99,14 @@ export function PredictionWorkspace({ region }: PredictionWorkspaceProps) {
 						<div className="flex flex-wrap items-center gap-2">
 							<Badge variant="outline">{workspace.response.region}</Badge>
 							<p className="text-sm text-muted-foreground">
-								Generated {new Date(workspace.response.generatedAt).toLocaleString()}
+								Generated{" "}
+								{new Date(workspace.response.generatedAt).toLocaleString()}
 							</p>
 						</div>
 					) : null}
 
 					<div className="grid gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.75fr)]">
-						<div className="min-h-96 overflow-hidden rounded-lg border bg-muted xl:min-h-[560px]">
+						<div className="min-h-96 overflow-hidden rounded-lg border bg-muted xl:min-h-140">
 							{isLoading ? (
 								<MapSkeleton />
 							) : (
@@ -147,7 +153,7 @@ export function PredictionWorkspace({ region }: PredictionWorkspaceProps) {
 }
 
 function MapSkeleton() {
-	return <Skeleton className="h-full min-h-96 w-full xl:min-h-[560px]" />;
+	return <Skeleton className="h-full min-h-96 w-full xl:min-h-140" />;
 }
 
 function PredictionReviewPanel({
