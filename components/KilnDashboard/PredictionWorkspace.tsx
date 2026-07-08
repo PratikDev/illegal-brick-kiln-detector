@@ -4,9 +4,9 @@ import * as React from "react";
 import dynamic from "next/dynamic";
 import { RiImageAddLine, RiPlayLine, RiRefreshLine } from "@remixicon/react";
 
-import type { Doc } from "@/convex/_generated/dataModel";
 import type { PredictionSummary as PredictionSummaryData } from "@/lib/prediction-api";
 import type { Prediction } from "@/lib/prediction-api";
+import type { Region } from "@/lib/regions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +40,7 @@ const KilnMap = dynamic(
 );
 
 type PredictionWorkspaceProps = {
-	region: Doc<"regions">;
+	region: Region;
 };
 
 export function PredictionWorkspace({ region }: PredictionWorkspaceProps) {

@@ -2,13 +2,13 @@
 
 import { CircleMarker, MapContainer, TileLayer } from "react-leaflet";
 
-import type { Doc } from "@/convex/_generated/dataModel";
 import type { Prediction } from "@/lib/prediction-api";
+import type { Region } from "@/lib/regions";
 import { getPredictionMarkerClassName } from "./prediction-marker-style";
 import { RecenterMap } from "./RecenterMap";
 
 type KilnMapProps = {
-	region: Doc<"regions">;
+	region: Region;
 	predictions: Prediction[];
 	selectedPredictionId: string | null;
 	onSelectPrediction: (prediction: Prediction) => void;
