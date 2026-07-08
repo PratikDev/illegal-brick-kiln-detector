@@ -15,7 +15,9 @@ type UsePredictionWorkspaceResult = {
 	status: PredictionStatus;
 	response: PredictResponse | null;
 	errorMessage: string | null;
+	selectedPredictionId: string | null;
 	selectedPrediction: Prediction | null;
+	predictions: Prediction[];
 	summary: ReturnType<typeof summarizePredictions>;
 	runPrediction: () => Promise<void>;
 	runUploadPrediction: (file: File) => Promise<void>;
@@ -137,7 +139,9 @@ export function usePredictionWorkspace(
 		status,
 		response,
 		errorMessage,
+		selectedPredictionId,
 		selectedPrediction,
+		predictions,
 		summary,
 		runPrediction,
 		runUploadPrediction,
