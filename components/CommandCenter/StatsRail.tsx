@@ -1,12 +1,12 @@
-import { RiAlertLine, RiMap2Line, RiScan2Line } from "@remixicon/react";
+import { RiAlertLine, RiDatabase2Line, RiScan2Line } from "@remixicon/react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEMO_TOTALS } from "@/lib/demo-data";
 
 const stats = [
-	{ label: "Priority districts", value: DEMO_TOTALS.districts, icon: RiMap2Line },
-	{ label: "Tiles reviewed", value: DEMO_TOTALS.tiles, icon: RiScan2Line },
-	{ label: "Critical signals", value: DEMO_TOTALS.critical, icon: RiAlertLine },
+	{ label: "Kilns detected", value: DEMO_TOTALS.tiles, icon: RiScan2Line },
+	{ label: "High-concern screens", value: DEMO_TOTALS.highConcern, icon: RiAlertLine },
+	{ label: "Registry gaps", value: DEMO_TOTALS.registryGaps, icon: RiDatabase2Line },
 ];
 
 export function StatsRail() {

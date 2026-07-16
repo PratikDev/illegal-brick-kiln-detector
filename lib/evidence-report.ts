@@ -1,7 +1,6 @@
 import type { jsPDF as JsPdfDocument } from "jspdf";
 
 import type { DemoDetection } from "@/lib/demo-data";
-import { ANALYSIS_MODELS } from "@/lib/demo-models";
 import { formatConfidence } from "@/lib/prediction-api";
 
 export async function downloadEvidenceReport(detection: DemoDetection): Promise<void> {
@@ -24,7 +23,7 @@ function drawReport(document: JsPdfDocument, detection: DemoDetection, evidenceI
 	document.text("KilnWatch Bangladesh", 16, 15);
 	document.setFont("helvetica", "normal");
 	document.setFontSize(9);
-	document.text("MODEL-ASSISTED FIELD VERIFICATION BRIEF", 16, 23);
+	document.text("ILLEGAL-KILN SCREENING & FIELD VERIFICATION BRIEF", 16, 23);
 	document.text(`Signal ${detection.id}`, 194, 15, { align: "right" });
 	document.text("Competition replay", 194, 23, { align: "right" });
 
@@ -42,8 +41,8 @@ function drawReport(document: JsPdfDocument, detection: DemoDetection, evidenceI
 	let y = 60;
 	for (const [label, value] of [
 		["Ensemble confidence", formatConfidence(detection.confidence)],
-		["Model agreement", `${detection.modelAgreement} of 3`],
-		["Risk triage", detection.risk],
+		["Compliance screen", detection.compliance.label],
+		["Rule coverage", `${detection.compliance.flaggedRuleCount} flagged / ${detection.compliance.missingEvidenceCount} missing`],
 		["Kiln class", detection.className ?? "Unclassified"],
 		["Coordinates", `${detection.lat.toFixed(5)}, ${detection.lon.toFixed(5)}`],
 		["Imagery", `${detection.imagerySource}, ${detection.imageryDate}`],
@@ -58,29 +57,28 @@ function drawReport(document: JsPdfDocument, detection: DemoDetection, evidenceI
 
 	document.setFont("helvetica", "bold");
 	document.setFontSize(12);
-	document.text("Model replay", 16, 142);
+	document.text("Compliance rule screen", 16, 142);
 	document.setFillColor(242, 245, 241);
-	document.roundedRect(16, 148, 178, 34, 2, 2, "F");
+	document.roundedRect(16, 148, 178, 42, 2, 2, "F");
 	document.setFontSize(9);
-	ANALYSIS_MODELS.forEach((model, index) => {
-		const columnX = 22 + index * 58;
+	detection.compliance.rules.forEach((rule, index) => {
+		const rowY = 157 + index * 8;
 		document.setFont("helvetica", "bold");
-		document.text(model.name, columnX, 157);
-		document.setFontSize(16);
-		document.text(formatConfidence(detection.modelScores[model.id]), columnX, 169);
+		document.text(rule.status.toUpperCase(), 22, rowY);
+		document.text(rule.label, 52, rowY);
 		document.setFontSize(8);
 		document.setFont("helvetica", "normal");
-		document.text(model.role, columnX, 176, { maxWidth: 52 });
+		document.text(rule.legalBasis, 188, rowY, { align: "right" });
 		document.setFontSize(9);
 	});
 
 	document.setFont("helvetica", "bold");
 	document.setFontSize(12);
-	document.text("Prioritization context", 16, 198);
+	document.text("Verification context", 16, 202);
 	document.setFont("helvetica", "normal");
 	document.setFontSize(9);
-	document.text(`Illustrative settlement proximity: ${detection.nearbySettlementKm} km`, 16, 207);
-	document.text(`Illustrative annual CO2 estimate: ${detection.estimatedAnnualCo2Tons.toLocaleString()} tonnes`, 16, 213);
+	document.text(`Prepared settlement proximity: ${detection.nearbySettlementKm} km`, 16, 210);
+	document.text(`Licence / clearance registry: ${detection.compliance.registryStatus}`, 16, 216);
 
 	document.setFillColor(255, 245, 228);
 	document.setDrawColor(201, 129, 38);
@@ -89,7 +87,7 @@ function drawReport(document: JsPdfDocument, detection: DemoDetection, evidenceI
 	document.text("FIELD VERIFICATION REQUIRED", 22, 233);
 	document.setFont("helvetica", "normal");
 	document.text(
-		"This brief contains replayed model outputs and illustrative derived estimates. It is not an enforcement decision. Verify the site, imagery date, ownership, operating status, and applicable law before action.",
+		"This brief contains replayed model outputs and screening rules. It does not determine that a kiln is illegal. Verify identity, location boundaries, household counts, licence and clearance records, field conditions, exceptions, and current law before action.",
 		22,
 		240,
 		{ maxWidth: 164 },

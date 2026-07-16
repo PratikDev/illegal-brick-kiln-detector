@@ -1,10 +1,10 @@
 # KilnWatch Bangladesh
 
-KilnWatch is a competition-ready earth-observation system for finding and prioritizing possible brick kilns across Bangladesh. It combines an instant national replay with real YOLO11-OBB inference: scan priority districts, compare model opinions, upload a satellite crop to the deployed LiteRT model, inspect oriented kiln geometry, and export a field-verification brief.
+KilnWatch is a competition-ready earth-observation system for detecting possible brick kilns and screening them for suspected non-compliance across Bangladesh. It combines an instant national replay with real YOLO11-OBB inference: localize kiln structures, evaluate transparent location and technology rules, expose missing licence and land-use evidence, and export a field-verification brief.
 
 The deployed experience is database-free and designed for Vercel's free tier. The Next.js command center is statically prerendered, while a Vercel Python Function runs the 10 MB TFLite checkpoint on CPU. It needs no paid map key, external GPU, or persistent storage.
 
-> **Model transparency:** the national scan replays deterministic, georeferenced outputs for a reliable presentation. The separate **Live AI** workflow runs the actual YOLO11-OBB TFLite checkpoint. RT-DETR and ViT remain replayed model views; no result is an enforcement decision.
+> **Model and legal transparency:** the national scan replays deterministic, georeferenced outputs and prepared compliance inputs for a reliable presentation. The separate **Live AI** workflow runs the actual YOLO11-OBB TFLite checkpoint. An image can detect a kiln candidate; it cannot establish that a kiln is illegal without verified location layers, authority records, and field evidence.
 
 ## Demo screenshots
 
@@ -16,7 +16,13 @@ The opening view combines freely served Sentinel-2 imagery, district controls, m
 
 ### Evidence review
 
-Every signal opens a traceable evidence workspace. The comparison slider separates the raw source tile from the replayed oriented geometry, while the panel exposes model agreement, risk, coordinates, imagery provenance, and review status.
+Every signal opens a traceable evidence workspace. Compliance is the default view: each rule shows its basis, status, supporting evidence, and gaps. The imagery view separates the raw source tile from replayed oriented geometry.
+
+![KilnWatch high-concern illegal-kiln compliance screening with auditable rule flags](docs/images/compliance-screening.jpg)
+
+### Imagery comparison
+
+The separate imagery tab keeps the original source pixels and replayed model geometry inspectable without mixing visual detection with legal status.
 
 ![KilnWatch signal evidence review with raw imagery and AI geometry](docs/images/evidence-review.png)
 
@@ -39,6 +45,9 @@ The same judge workflow is designed for phones and narrow presentation windows. 
 - Displays a full-screen MapLibre satellite command center centered on Bangladesh.
 - Streams 50 prepared, georeferenced signals from five priority districts.
 - Draws rotated geographic kiln polygons instead of generic point-only markers.
+- Screens detections for potential residential-buffer and kiln-technology concerns.
+- Keeps licence/clearance and prohibited-land-use checks explicitly unresolved until authoritative data is connected.
+- Shows every compliance rule, legal basis, evidence type, and missing verification step.
 - Switches between an ensemble view and three individual model perspectives.
 - Runs real YOLO11-OBB inference through a Vercel Python Function.
 - Accepts uploaded PNG, JPEG, and WebP satellite crops without storing them.
@@ -57,9 +66,9 @@ Click **Judge mode** in the top model bar or the compact mobile action. The appl
 1. Establishes a national overview over Bangladesh.
 2. Replays the priority-district scan.
 3. Streams all 50 signals and renders their geographic geometry.
-4. Triages detections using ensemble confidence and model agreement.
-5. Selects a high-priority Tangail signal.
-6. Opens its raw-versus-AI evidence comparison.
+4. Applies a separate compliance screen after kiln detection.
+5. Selects a high-concern Tangail signal with multiple review flags.
+6. Opens its rule audit, registry gaps, and imagery evidence.
 7. Leaves the interface ready to export a field-verification brief or answer questions.
 
 The regular scan remains available for a presenter who wants manual control.
@@ -80,6 +89,20 @@ Agreement is the number of replayed model scores at or above the 68% review thre
 These scores are deterministic demo data generated from the bundled manifest. They make the interaction fast, repeatable, free to host, and honest about what is and is not running at presentation time.
 
 The **Live AI** dialog is intentionally separate from those scores. It uses `model/best.tflite` through `ai-edge-litert`, returns only genuine YOLO11-OBB detections, and reports server processing time. It never assigns RT-DETR, ViT, or ensemble values to an uploaded image.
+
+## Illegal-kiln screening
+
+The project now separates **physical detection** from **legal/compliance screening**:
+
+1. **Detect a kiln candidate.** YOLO11-OBB or the replayed ensemble provides geometry, class, and confidence.
+2. **Run measurable screening rules.** The demo checks an estimated residential/prohibited-area buffer and whether the replayed technology class matches the cleaner technology represented by Zigzag.
+3. **Expose unavailable evidence.** Government licence and environmental-clearance records, agricultural/wetland/forest/ECA layers, verified household counts, operating status, and field observations remain visibly unresolved.
+4. **Prioritize investigation.** Multiple replay flags produce **High-concern screen**; one produces **Compliance review**. Only a connected authority record marked expired or not found can produce **Probable non-compliance**.
+5. **Require human determination.** No tier is labelled “illegal,” and every screen states that identity, current records, exceptions, straight-line distance, and field conditions must be verified.
+
+The location rules are anchored to Section 8 of Bangladesh's [Brick Manufacturing and Brick Kilns Establishment (Control) Act, 2013](https://bangladesh.gov.bd/sites/default/files/files/bangladesh.gov.bd/gurd_files/2e08b992_2223_44a9_ae59_28b805e606bc/%E0%A6%93%20%E0%A6%AD%E0%A6%BE%E0%A6%9F%E0%A6%BE%20%E0%A6%B8%E0%A7%8D%E0%A6%A5%E0%A6%BE%E0%A6%AA%E0%A6%A8%20%28%E0%A6%A8%E0%A6%BF%E0%A7%9F%E0%A6%A8%E0%A7%8D%E0%A6%A4%E0%A7%8D%E0%A6%B0%E0%A6%A3%29%20%E0%A6%86%E0%A6%87%E0%A6%A8%2C%20%E0%A7%A8%E0%A7%A6%E0%A7%A7%E0%A7%A9.pdf), as amended in 2019. The workflow mirrors the evidence categories in the [brick-kiln enforcement inspection guide](https://faolex.fao.org/docs/pdf/BGD234326.pdf): technology and operating status; surrounding houses and sensitive facilities; GPS and straight-line distance; land category; environmental clearance; licence status; pollution controls; and field testimony.
+
+The bundled values remain a deterministic competition replay. To make this production-capable, connect dated authority records and authoritative geospatial layers, record their provenance/version, and retain reviewer sign-off. The compliance engine in `lib/compliance-screening.ts` already accepts verified licence states without coupling the rules to a database vendor.
 
 ## Satellite imagery
 
@@ -106,6 +129,9 @@ For genuinely better imagery, replace each local crop with a larger export cover
 Selecting a signal opens the evidence sheet with:
 
 - raw imagery and replayed OBB geometry;
+- compliance tier, flagged rules, and evidence gaps;
+- Section 8 residential-buffer screening and cleaner-technology screening;
+- explicit licence/clearance and prohibited-land-use registry gaps;
 - active-model or ensemble confidence;
 - three-model agreement;
 - kiln class and risk tier;
@@ -114,7 +140,7 @@ Selecting a signal opens the evidence sheet with:
 - illustrative settlement proximity and annual CO₂ context;
 - a clear field-verification requirement.
 
-The **Download evidence PDF** action creates a one-page A4 brief using jsPDF. The report includes the source tile, geometry, individual model scores, provenance, prioritization context, and a prominent non-enforcement disclaimer. No evidence is uploaded to a server.
+The **Download evidence PDF** action creates a one-page A4 investigation brief using jsPDF. The report includes source geometry, compliance tier, every rule status and basis, registry state, provenance, and a prominent non-enforcement disclaimer. No evidence is uploaded to a server.
 
 A visually verified example is available at [`output/pdf/kilnwatch-sample-evidence.pdf`](output/pdf/kilnwatch-sample-evidence.pdf).
 
@@ -125,7 +151,11 @@ flowchart LR
     A["EOX Sentinel-2 basemap"] --> D["MapLibre command center"]
     B["Bundled tile manifest"] --> C["Deterministic model replay"]
     C --> D
-    C --> E["Signal evidence sheet"]
+    C --> L["Compliance rule engine"]
+    M["Licence + clearance registry (optional)"] --> L
+    N["Land-use + protected-area layers (optional)"] --> L
+    L --> E["Rule audit + evidence gaps"]
+    C --> E
     E --> F["Browser-generated PDF brief"]
     D --> G["Guided judge mode"]
     E --> G
@@ -328,6 +358,7 @@ components/ui/               shadcn/ui building blocks
 api/predict.py               Vercel Python Function and LiteRT inference
 lib/demo-data.ts             Georeferenced detections and deterministic model scores
 lib/demo-models.ts           Model identities, roles, and view types
+lib/compliance-screening.ts  Auditable legal-screening rules and evidence states
 lib/image-preprocess.ts       Browser resizing and request-size control
 lib/evidence-report.ts       Browser-side A4 PDF generation
 model/best.tflite             Deployed YOLO11-OBB checkpoint
@@ -347,9 +378,9 @@ Start with [`ml/README.md`](ml/README.md) and [`ml/EXPERIMENTS.md`](ml/EXPERIMEN
 
 ## Responsible-use limitations
 
-- A model signal is a review lead, not proof of an illegal kiln.
+- A model signal or screening flag is an investigation lead, not proof of an illegal kiln.
 - The 2024 layer is an annual cloudless composite, not current or real-time imagery.
-- Settlement proximity and annual emissions are illustrative competition estimates.
+- Settlement proximity, technology class, compliance flags, and annual emissions are illustrative competition replay values.
 - Kiln ownership, operating status, permit status, imagery date, and applicable law require independent verification.
 - Field review and human judgment are required before enforcement or public claims.
 

@@ -1,5 +1,6 @@
 import tileManifest from "@/model/tiles.json";
 
+import { screenKilnCompliance, type ComplianceScreen } from "@/lib/compliance-screening";
 import { ANALYSIS_MODEL_IDS, type AnalysisModelId, type AnalysisViewId } from "@/lib/demo-models";
 import type { Prediction, PredictionClassName } from "@/lib/prediction-api";
 import { SUPPORTED_REGIONS, type RegionSlug } from "@/lib/regions";
@@ -23,6 +24,7 @@ export type DemoDetection = Prediction & {
 	imagerySource: string;
 	imageryDate: string;
 	resolutionMeters: number;
+	compliance: ComplianceScreen;
 };
 
 const confidenceSequence = [0.96, 0.92, 0.89, 0.86, 0.83, 0.78, 0.74, 0.68, 0.61, 0.55];
@@ -53,6 +55,7 @@ export const DEMO_DETECTIONS: DemoDetection[] = Object.entries(manifest).flatMap
 			const angle = ((tileIndex * 19 + regionIndex * 11) % 130) - 65;
 			const widthMeters = 190 + ((tileIndex * 31 + regionIndex * 17) % 170);
 			const heightMeters = 82 + ((tileIndex * 13 + regionIndex * 7) % 84);
+			const nearbySettlementKm = Number((0.4 + ((tileIndex * 7 + regionIndex) % 19) / 10).toFixed(1));
 
 			return {
 				id: tile.id,
@@ -70,7 +73,7 @@ export const DEMO_DETECTIONS: DemoDetection[] = Object.entries(manifest).flatMap
 				regionSlug,
 				regionName: region.name,
 				risk: confidence >= 0.85 ? "Critical" : confidence >= 0.68 ? "Elevated" : "Watch",
-				nearbySettlementKm: Number((0.4 + ((tileIndex * 7 + regionIndex) % 19) / 10).toFixed(1)),
+				nearbySettlementKm,
 				estimatedAnnualCo2Tons: 9_800 + ((tileIndex * 2_700 + regionIndex * 1_300) % 18_000),
 				modelScores,
 				modelAgreement: ANALYSIS_MODEL_IDS.filter((modelId) => modelScores[modelId] >= 0.68).length,
@@ -78,6 +81,11 @@ export const DEMO_DETECTIONS: DemoDetection[] = Object.entries(manifest).flatMap
 				imagerySource: "EOX Sentinel-2 Cloudless",
 				imageryDate: "2024 annual composite",
 				resolutionMeters: 10,
+				compliance: screenKilnCompliance({
+					nearbySettlementKm,
+					className,
+					registryStatus: "not-checked",
+				}),
 			};
 		});
 	},
@@ -87,6 +95,10 @@ export const DEMO_TOTALS = {
 	districts: SUPPORTED_REGIONS.length,
 	tiles: DEMO_DETECTIONS.length,
 	critical: DEMO_DETECTIONS.filter(({ risk }) => risk === "Critical").length,
+	highConcern: DEMO_DETECTIONS.filter(({ compliance }) =>
+		["probable-non-compliance", "high-concern"].includes(compliance.tier),
+	).length,
+	registryGaps: DEMO_DETECTIONS.filter(({ compliance }) => compliance.registryStatus === "not-checked").length,
 	annualCo2Tons: DEMO_DETECTIONS.reduce(
 		(total, detection) => total + detection.estimatedAnnualCo2Tons,
 		0,

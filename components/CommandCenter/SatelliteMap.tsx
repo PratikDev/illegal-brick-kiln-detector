@@ -3,6 +3,7 @@
 import maplibregl, { type GeoJSONSource, type Map as MapLibreMap } from "maplibre-gl";
 import * as React from "react";
 
+import { getComplianceRank } from "@/lib/compliance-screening";
 import { getDetectionConfidence, type DemoDetection } from "@/lib/demo-data";
 import type { AnalysisViewId } from "@/lib/demo-models";
 import { SUPPORTED_REGIONS, type RegionSlug } from "@/lib/regions";
@@ -98,9 +99,9 @@ export function SatelliteMap({
 				paint: {
 					"fill-color": [
 						"case",
-						[">=", ["get", "confidence"], 0.85],
+						[">=", ["get", "complianceRank"], 3],
 						"#ff4d2e",
-						[">=", ["get", "confidence"], 0.68],
+						[">=", ["get", "complianceRank"], 2],
 						"#ffb020",
 						"#d7f45b",
 					],
@@ -136,9 +137,9 @@ export function SatelliteMap({
 					"circle-radius": ["case", ["get", "selected"], 7, 5],
 					"circle-color": [
 						"case",
-						[">=", ["get", "confidence"], 0.85],
+						[">=", ["get", "complianceRank"], 3],
 						"#ff4d2e",
-						[">=", ["get", "confidence"], 0.68],
+						[">=", ["get", "complianceRank"], 2],
 						"#ffb020",
 						"#d7f45b",
 					],
@@ -209,7 +210,7 @@ export function SatelliteMap({
 		}
 	}, [judgeStage]);
 
-	return <div ref={containerRef} className="satellite-map" aria-label="Sentinel-2 kiln detection map" />;
+	return <div ref={containerRef} className="satellite-map" aria-label="Sentinel-2 illegal-kiln screening map" />;
 }
 
 function toPointFeatureCollection(
@@ -225,6 +226,7 @@ function toPointFeatureCollection(
 			properties: {
 				id: detection.id,
 				confidence: getDetectionConfidence(detection, activeModel),
+				complianceRank: getComplianceRank(detection.compliance.tier),
 				selected: detection.id === selectedId,
 			},
 		})),
@@ -244,6 +246,7 @@ function toPolygonFeatureCollection(
 			properties: {
 				id: detection.id,
 				confidence: getDetectionConfidence(detection, activeModel),
+				complianceRank: getComplianceRank(detection.compliance.tier),
 				selected: detection.id === selectedId,
 			},
 		})),

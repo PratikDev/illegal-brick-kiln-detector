@@ -9,8 +9,8 @@ export type JudgeStage = "overview" | "scan" | "triage" | "evidence" | "ready";
 
 const judgeTarget =
 	DEMO_DETECTIONS.find(
-		({ regionSlug, risk, modelAgreement }) =>
-			regionSlug === "tangail" && risk === "Critical" && modelAgreement === 3,
+		({ regionSlug, compliance, modelAgreement }) =>
+			regionSlug === "tangail" && compliance.tier === "high-concern" && modelAgreement === 3,
 	) ?? DEMO_DETECTIONS[0];
 
 export function useCommandScan() {

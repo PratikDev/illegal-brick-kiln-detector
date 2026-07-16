@@ -8,10 +8,10 @@ import type { JudgeStage } from "./use-command-scan";
 
 const stageDetails: Record<JudgeStage, { label: string; description: string; progress: number }> = {
 	overview: { label: "01 · National overview", description: "Five priority districts come online.", progress: 12 },
-	scan: { label: "02 · AI ensemble scan", description: "Three replayed model views score every tile.", progress: 42 },
-	triage: { label: "03 · Critical triage", description: "Consensus signals rise above the review threshold.", progress: 68 },
-	evidence: { label: "04 · Evidence inspection", description: "The camera enters a high-agreement Tangail signal.", progress: 88 },
-	ready: { label: "05 · Brief ready", description: "Review the evidence and export the field-verification brief.", progress: 100 },
+	scan: { label: "02 · Kiln detection", description: "Three replayed model views localize kiln structures.", progress: 42 },
+	triage: { label: "03 · Compliance screen", description: "Location, technology, and evidence rules prioritize review.", progress: 68 },
+	evidence: { label: "04 · Rule inspection", description: "The camera enters a high-concern Tangail screen.", progress: 88 },
+	ready: { label: "05 · Investigation brief", description: "Review flags and evidence gaps before field verification.", progress: 100 },
 };
 
 export function JudgeModeBar({ stage, onStop }: { stage: JudgeStage; onStop: () => void }) {
