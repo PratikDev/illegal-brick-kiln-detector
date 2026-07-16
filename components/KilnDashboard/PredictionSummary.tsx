@@ -1,16 +1,29 @@
 import { Badge } from "@/components/ui/badge";
+import type { ComplianceSummary } from "@/lib/compliance-summary";
 import type { PredictionSummary as PredictionSummaryData } from "@/lib/prediction-api";
 import { formatConfidence } from "@/lib/prediction-api";
 
 type PredictionSummaryProps = {
 	summary: PredictionSummaryData;
+	compliance: ComplianceSummary;
 };
 
-export function PredictionSummary({ summary }: PredictionSummaryProps) {
+export function PredictionSummary({
+	summary,
+	compliance,
+}: PredictionSummaryProps) {
+	// "High confidence" is dropped: the model tops out near 0.72, so a >0.8 band
+	// reads 0 forever. These two say something instead.
 	const stats = [
 		{ label: "Detections", value: summary.total.toString() },
-		{ label: "High confidence", value: summary.highConfidence.toString() },
-		{ label: "Medium confidence", value: summary.mediumConfidence.toString() },
+		{
+			label: "Likely non-compliant",
+			value: compliance.likelyNonCompliant.toString(),
+		},
+		{
+			label: "Within 1 km of a school",
+			value: compliance.nearSchool.toString(),
+		},
 		{
 			label: "Avg. confidence",
 			value: formatConfidence(summary.averageConfidence),

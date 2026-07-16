@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
 	formatDistance,
@@ -8,6 +7,7 @@ import {
 	type Violation,
 } from "@/lib/compliance";
 import { cn } from "@/lib/utils";
+import { PriorityBadge } from "./PriorityBadge";
 
 type VerdictCardProps = {
 	compliance?: ComplianceResult;
@@ -39,9 +39,10 @@ export function VerdictCard({ compliance, onFocusFeature }: VerdictCardProps) {
 					<h3 className="font-medium">{copy.title}</h3>
 					<p className="mt-1 text-xs text-muted-foreground">{copy.note}</p>
 				</div>
-				<Badge variant={flagged ? "destructive" : "secondary"}>
-					Priority {compliance.priorityScore}
-				</Badge>
+				<PriorityBadge
+					score={compliance.priorityScore}
+					band={compliance.priorityBand}
+				/>
 			</header>
 
 			{compliance.violations.length > 0 ? (

@@ -104,6 +104,38 @@ def load_region_bboxes() -> dict[str, dict[str, Any]]:
     return out
 
 
+# Bangladesh OSM names are frequently imported with the feature type appended:
+# "Sonakandor Primary School, School" / "Singuriya Community Clinic, Hospital".
+# Rendering that verbatim reads badly and sometimes contradicts itself, so strip
+# it at ingest. Only a trailing segment that IS a type word is removed -- a name
+# like "St. Mary's School, Dhaka" keeps its comma, because "Dhaka" is not a type.
+NAME_TYPE_SUFFIXES = frozenset(
+    {
+        "school", "primary school", "high school", "secondary school",
+        "religious school", "madrasah", "madrasa", "kindergarten", "college",
+        "university", "institute", "academy",
+        "hospital", "clinic", "community clinic", "health centre",
+        "health center", "medical centre", "medical center", "dispensary",
+        "doctors", "pharmacy",
+        "river", "canal", "lake", "pond", "water", "wetland",
+        "forest", "wood", "farmland", "railway", "rail",
+        "village", "town", "city", "residential",
+    }
+)
+
+
+def clean_name(name: str | None) -> str | None:
+    """Drop a trailing ', <Type>' when the tail is exactly a known type word."""
+    if not name or "," not in name:
+        return name
+
+    head, _, tail = name.rpartition(",")
+    head = head.strip()
+    if head and tail.strip().lower() in NAME_TYPE_SUFFIXES:
+        return head
+    return name
+
+
 def build_query(bbox: list[float]) -> str:
     south, west, north, east = bbox
     box = f"({south},{west},{north},{east})"
@@ -214,7 +246,7 @@ def fetch_features(bbox: list[float]) -> list[dict[str, Any]]:
             {
                 "id": feature_id,
                 "kind": kind,
-                "name": tags.get("name") or tags.get("name:en"),
+                "name": clean_name(tags.get("name") or tags.get("name:en")),
                 "geometry": geometry,
             }
         )

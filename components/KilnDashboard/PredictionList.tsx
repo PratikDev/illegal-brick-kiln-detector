@@ -2,9 +2,11 @@ import { RiCrosshair2Line } from "@remixicon/react";
 
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatDistance } from "@/lib/compliance";
 import { cn } from "@/lib/utils";
 import type { Prediction } from "@/lib/prediction-api";
 import { formatConfidence, getConfidenceTone } from "@/lib/prediction-api";
+import { PriorityBadge } from "./PriorityBadge";
 
 type PredictionListProps = {
 	predictions: Prediction[];
@@ -37,6 +39,12 @@ export function PredictionList({
 						>
 							<div className="flex min-w-0 flex-col gap-1">
 								<div className="flex flex-wrap items-center gap-2">
+									{prediction.compliance ? (
+										<PriorityBadge
+											score={prediction.compliance.priorityScore}
+											band={prediction.compliance.priorityBand}
+										/>
+									) : null}
 									<Badge variant={getBadgeVariant(prediction.confidence)}>
 										{formatConfidence(prediction.confidence)}
 									</Badge>
@@ -45,9 +53,21 @@ export function PredictionList({
 									</Badge>
 								</div>
 								<p className="truncate font-medium">{prediction.id}</p>
-								<p className="text-xs text-muted-foreground">
-									{prediction.lat.toFixed(5)}, {prediction.lon.toFixed(5)}
-								</p>
+								{prediction.compliance &&
+								prediction.compliance.violations.length > 0 ? (
+									<p className="truncate text-xs text-muted-foreground">
+										{prediction.compliance.violations
+											.map(
+												(violation) =>
+													`${violation.rule} ${formatDistance(violation.distanceM)}`,
+											)
+											.join(" · ")}
+									</p>
+								) : (
+									<p className="text-xs text-muted-foreground">
+										{prediction.lat.toFixed(5)}, {prediction.lon.toFixed(5)}
+									</p>
+								)}
 							</div>
 							<RiCrosshair2Line
 								className="mt-1 shrink-0 text-muted-foreground"
