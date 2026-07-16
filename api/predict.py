@@ -4,6 +4,7 @@ import base64
 import json
 import math
 import os
+import threading
 import time
 import urllib.parse
 import urllib.request
@@ -56,6 +57,7 @@ _INTERPRETER: Any | None = None
 _INPUT_DETAILS: list[dict[str, Any]] | None = None
 _OUTPUT_DETAILS: list[dict[str, Any]] | None = None
 _MANIFEST_CACHE: dict[str, list[Tile]] | None = None
+_INTERPRETER_LOCK = threading.Lock()
 
 
 def _json_response(handler: BaseHTTPRequestHandler, status: int, body: dict[str, Any]) -> None:
@@ -65,6 +67,7 @@ def _json_response(handler: BaseHTTPRequestHandler, status: int, body: dict[str,
     handler.send_header("Access-Control-Allow-Origin", "*")
     handler.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
     handler.send_header("Access-Control-Allow-Headers", "Content-Type")
+    handler.send_header("Cache-Control", "no-store")
     handler.send_header("Content-Length", str(len(payload)))
     handler.end_headers()
     handler.wfile.write(payload)
@@ -170,9 +173,12 @@ def _run_model(input_tensor: np.ndarray) -> np.ndarray:
     else:
         input_tensor = input_tensor.astype(input_detail["dtype"])
 
-    interpreter.set_tensor(input_detail["index"], input_tensor)
-    interpreter.invoke()
-    return interpreter.get_tensor(_OUTPUT_DETAILS[0]["index"])
+    # A warm Fluid Compute instance may receive concurrent requests. LiteRT
+    # interpreters are mutable, so serialize set/invoke/get on the shared model.
+    with _INTERPRETER_LOCK:
+        interpreter.set_tensor(input_detail["index"], input_tensor)
+        interpreter.invoke()
+        return interpreter.get_tensor(_OUTPUT_DETAILS[0]["index"])
 
 
 def _decode_output(
@@ -330,6 +336,7 @@ def predict_region(
     iou: float,
     base_url: str | None = None,
 ) -> dict[str, Any]:
+    started_at = time.perf_counter()
     tiles = _load_manifest().get(region, [])[:MAX_TILES_PER_REGION]
     predictions: list[dict[str, Any]] = []
 
@@ -345,6 +352,10 @@ def predict_region(
         "region": region,
         "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "predictions": predictions[:MAX_DETECTIONS],
+        "inference": _inference_metadata(
+            mode="seeded-region",
+            processing_ms=math.floor((time.perf_counter() - started_at) * 1000),
+        ),
     }
 
 
@@ -354,6 +365,7 @@ def predict_uploaded_image(
     confidence: float,
     iou: float,
 ) -> dict[str, Any]:
+    started_at = time.perf_counter()
     image = _image_from_data_url(image_data_url)
     tile = _upload_tile(region, image_data_url)
     _load_interpreter()
@@ -363,6 +375,10 @@ def predict_uploaded_image(
         "region": region,
         "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "predictions": _decode_output(output, tile, confidence, iou)[:MAX_DETECTIONS],
+        "inference": _inference_metadata(
+            mode="uploaded-image",
+            processing_ms=math.floor((time.perf_counter() - started_at) * 1000),
+        ),
     }
 
 
@@ -372,7 +388,9 @@ def _upload_tile(region: str, image_data_url: str) -> Tile:
 
     return Tile(
         tile_id=f"{region}_upload",
-        url=image_data_url,
+        # The browser already owns the preview. Do not repeat a base64 image in
+        # every returned detection, which would inflate the server response.
+        url=None,
         path=None,
         center_lat=reference.center_lat if reference else 23.685,
         center_lon=reference.center_lon if reference else 90.3563,
@@ -391,6 +409,17 @@ def _image_from_data_url(image_data_url: str) -> Image.Image:
         raise ValueError("Uploaded image is too large")
 
     return Image.open(BytesIO(raw)).convert("RGB")
+
+
+def _inference_metadata(mode: str, processing_ms: int) -> dict[str, Any]:
+    return {
+        "mode": mode,
+        "runtime": "LiteRT CPU",
+        "model": "YOLO11-OBB",
+        "modelFile": MODEL_PATH.name,
+        "inputSize": INPUT_SIZE,
+        "processingMs": processing_ms,
+    }
 
 
 class handler(BaseHTTPRequestHandler):
@@ -495,4 +524,9 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8000"))
     server = HTTPServer(("127.0.0.1", port), handler)
     print(f"Serving prediction API at http://127.0.0.1:{port}/predict")
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
