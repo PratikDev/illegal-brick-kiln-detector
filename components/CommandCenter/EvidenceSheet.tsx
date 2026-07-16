@@ -19,6 +19,7 @@ import { ANALYSIS_MODELS, getModelLabel, type AnalysisViewId } from "@/lib/demo-
 import { downloadEvidenceReport } from "@/lib/evidence-report";
 import { formatConfidence } from "@/lib/prediction-api";
 import { EvidenceComparison } from "./EvidenceComparison";
+import { ComplianceScreeningPanel } from "./ComplianceScreeningPanel";
 
 export function EvidenceSheet({
 	detection,
@@ -34,21 +35,26 @@ export function EvidenceSheet({
 			<SheetContent className="w-full overflow-y-auto sm:max-w-lg">
 				<SheetHeader>
 					<SheetTitle>Signal intelligence</SheetTitle>
-					<SheetDescription>Georeferenced tile evidence and model-assisted risk triage.</SheetDescription>
+					<SheetDescription>Kiln detection followed by auditable non-compliance screening.</SheetDescription>
 				</SheetHeader>
 				{detection ? (
 					<div className="flex flex-col gap-5 px-4 pb-6">
 						<div className="flex flex-wrap gap-2">
+							<Badge variant={complianceBadgeVariant(detection.compliance.tier)}>{detection.compliance.label}</Badge>
 							<Badge>{formatConfidence(getDetectionConfidence(detection, activeModel))} {getModelLabel(activeModel)}</Badge>
 							<Badge variant="secondary">{detection.className}</Badge>
 							<Badge variant="outline">{detection.modelAgreement}/3 models agree</Badge>
 							<Badge variant={detection.risk === "Critical" ? "destructive" : "outline"}>{detection.risk} risk</Badge>
 						</div>
-						<Tabs defaultValue="evidence">
+						<Tabs defaultValue="compliance">
 							<TabsList className="w-full">
-								<TabsTrigger value="evidence">Evidence comparison</TabsTrigger>
-								<TabsTrigger value="models">Model replay</TabsTrigger>
+								<TabsTrigger value="compliance">Compliance</TabsTrigger>
+								<TabsTrigger value="evidence">Imagery</TabsTrigger>
+								<TabsTrigger value="models">Models</TabsTrigger>
 							</TabsList>
+							<TabsContent value="compliance" className="pt-3">
+								<ComplianceScreeningPanel screen={detection.compliance} />
+							</TabsContent>
 							<TabsContent value="evidence" className="pt-3">
 								<EvidenceComparison detection={detection} />
 							</TabsContent>
@@ -84,8 +90,8 @@ export function EvidenceSheet({
 						<div className="flex items-start gap-3 text-sm">
 							<RiShieldCheckLine className="mt-0.5" aria-hidden="true" />
 							<div>
-								<p className="font-medium">Review status</p>
-								<p className="text-muted-foreground">Model signal — field verification required before enforcement.</p>
+								<p className="font-medium">Legal determination</p>
+								<p className="text-muted-foreground">Not determined — authority records and field verification are required.</p>
 							</div>
 						</div>
 						<p className="text-xs text-muted-foreground">
@@ -106,6 +112,12 @@ export function EvidenceSheet({
 			</SheetContent>
 		</Sheet>
 	);
+}
+
+function complianceBadgeVariant(tier: DemoDetection["compliance"]["tier"]): "destructive" | "secondary" | "outline" {
+	if (tier === "probable-non-compliance" || tier === "high-concern") return "destructive";
+	if (tier === "review") return "secondary";
+	return "outline";
 }
 
 function Detail({ label, value }: { label: string; value: string }) {

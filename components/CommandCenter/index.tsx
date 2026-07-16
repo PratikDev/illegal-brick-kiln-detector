@@ -61,8 +61,8 @@ export function CommandCenter() {
 				<div className="pointer-events-auto flex items-center gap-2">
 					<Badge variant="secondary">
 						<RiLiveLine data-icon="inline-start" />
-						<span className="hidden sm:inline">Hybrid AI demo</span>
-						<span className="sm:hidden">Hybrid</span>
+						<span className="hidden sm:inline">Illegal-kiln screening</span>
+						<span className="sm:hidden">Screening</span>
 					</Badge>
 					<Button variant="secondary" size="icon-sm" onClick={scan.resetDemo} aria-label="Reset demo">
 						<RiRestartLine />

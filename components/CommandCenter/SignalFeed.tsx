@@ -27,7 +27,7 @@ export function SignalFeed({
 						<RiRadarLine aria-hidden="true" />
 						National replay feed
 					</CardTitle>
-					<Badge variant="secondary">{detections.length} found · {getModelLabel(activeModel)}</Badge>
+					<Badge variant="secondary">{detections.length} screened · {getModelLabel(activeModel)}</Badge>
 				</div>
 			</CardHeader>
 			<CardContent className="p-0">
@@ -45,7 +45,10 @@ export function SignalFeed({
 										<RiMapPin2Line aria-hidden="true" />
 									</span>
 									<span className="min-w-0 flex-1">
-										<span className="block truncate font-medium">{detection.regionName} · {detection.className}</span>
+										<span className="flex items-center gap-2">
+											<span className="truncate font-medium">{detection.regionName} · {detection.className}</span>
+											{detection.compliance.flaggedRuleCount ? <Badge variant="destructive">{detection.compliance.flaggedRuleCount} flags</Badge> : null}
+										</span>
 										<span className="block text-xs text-command-muted">
 											{formatConfidence(getDetectionConfidence(detection, activeModel))} confidence · {detection.modelAgreement}/3 agree
 										</span>

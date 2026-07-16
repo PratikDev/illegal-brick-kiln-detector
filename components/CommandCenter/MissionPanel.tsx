@@ -62,7 +62,7 @@ export function MissionPanel({
 				</div>
 				<CardTitle className="font-heading text-2xl">National kiln watch</CardTitle>
 				<CardDescription className="text-command-muted">
-					Replay national coverage or run Live AI on a satellite crop. Select any signal to inspect its evidence.
+					Detect kiln structures, then screen location, technology, licence, and land-use evidence for suspected non-compliance.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-4">
@@ -89,6 +89,12 @@ export function MissionPanel({
 						<span>{visibleCount} / {totalCount}</span>
 					</div>
 					<Progress value={progress} aria-label={`${progress}% scan complete`} />
+				</div>
+
+				<div className="flex flex-wrap gap-2" aria-label="Compliance map legend">
+					<Badge variant="destructive">High concern</Badge>
+					<Badge variant="secondary">Review</Badge>
+					<Badge variant="outline" className="border-command-border text-command-foreground">Evidence gaps</Badge>
 				</div>
 			</CardContent>
 			<CardFooter className="gap-2">

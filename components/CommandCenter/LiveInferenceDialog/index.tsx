@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	RiAlertLine,
 	RiCpuLine,
 	RiImageAddLine,
 	RiRadarLine,
@@ -74,6 +75,13 @@ export function LiveInferenceDialog({ compact = false }: { compact?: boolean }) 
 							<AlertTitle>Real server inference</AlertTitle>
 							<AlertDescription>
 								The browser letterboxes the image to 256 × 256, then sends it to the Vercel Python Function. The upload is processed in memory and is not stored.
+							</AlertDescription>
+						</Alert>
+						<Alert variant="destructive">
+							<RiAlertLine />
+							<AlertTitle>Detection is not a legality result</AlertTitle>
+							<AlertDescription>
+								An uploaded crop has no verified coordinates, prohibited-area layers, licence record, or field evidence. Live AI can detect a kiln candidate but cannot classify it as illegal.
 							</AlertDescription>
 						</Alert>
 
