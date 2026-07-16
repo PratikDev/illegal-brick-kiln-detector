@@ -4,6 +4,8 @@ import { CircleMarker, MapContainer, TileLayer } from "react-leaflet";
 
 import type { Prediction } from "@/lib/prediction-api";
 import type { Region } from "@/lib/regions";
+import { BufferOverlay } from "./BufferOverlay";
+import { FocusSelection } from "./FocusSelection";
 import { getPredictionMarkerClassName } from "./prediction-marker-style";
 import { RecenterMap } from "./RecenterMap";
 
@@ -20,11 +22,15 @@ export function KilnMap({
 	selectedPredictionId,
 	onSelectPrediction,
 }: KilnMapProps) {
-	const center: [number, number] = [region.centerLat, region.centerLon];
+	// Only the selected detection gets a buffer ring. All of them at once is
+	// noise, not insight.
+	const selected = predictions.find(
+		({ id }) => id === selectedPredictionId,
+	);
 
 	return (
 		<MapContainer
-			center={center}
+			center={[region.centerLat, region.centerLon]}
 			zoom={region.defaultZoom}
 			scrollWheelZoom
 			className="kiln-map"
@@ -34,7 +40,21 @@ export function KilnMap({
 				attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 			/>
-			<RecenterMap center={center} zoom={region.defaultZoom} />
+			<RecenterMap
+				lat={region.centerLat}
+				lon={region.centerLon}
+				zoom={region.defaultZoom}
+			/>
+			<FocusSelection
+				lat={selected?.lat ?? null}
+				lon={selected?.lon ?? null}
+			/>
+			{selected ? (
+				<BufferOverlay
+					kiln={[selected.lat, selected.lon]}
+					compliance={selected.compliance}
+				/>
+			) : null}
 			{predictions.map((prediction) => {
 				const isSelected = prediction.id === selectedPredictionId;
 

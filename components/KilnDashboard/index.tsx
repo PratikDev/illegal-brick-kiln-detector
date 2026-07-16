@@ -16,7 +16,7 @@ import { EmptyRegionsState } from "./EmptyRegionsState";
 import { PredictionWorkspace } from "./PredictionWorkspace";
 import { RegionStatus } from "./RegionStatus";
 import { RegionSwitcher } from "./RegionSwitcher";
-import { SUPPORTED_REGIONS, type Region, type RegionId } from "@/lib/regions";
+import { DEFAULT_REGION_SLUG, SUPPORTED_REGIONS, type Region, type RegionId } from "@/lib/regions";
 
 export function KilnDashboard() {
 	return <KilnDashboardView regions={SUPPORTED_REGIONS} />;
@@ -31,7 +31,9 @@ function KilnDashboardView({ regions }: { regions: Region[] }) {
 	}
 
 	const selectedRegion =
-		regions.find((region) => region.id === selectedRegionId) ?? regions[0];
+	regions.find((region) => region.id === selectedRegionId) ??
+	regions.find((region) => region.slug === DEFAULT_REGION_SLUG) ??
+	regions[0];
 
 	return (
 		<main className="flex min-h-full flex-1 bg-background">

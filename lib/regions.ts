@@ -9,6 +9,8 @@ export const REGION_SLUGS = [
 ] as const;
 
 export type RegionSlug = (typeof REGION_SLUGS)[number];
+/** Demo lands here: richest OSM coverage (194 schools) of the five. */
+export const DEFAULT_REGION_SLUG: RegionSlug = "tangail";
 export type RegionId = `local_${RegionSlug}`;
 
 export type Region = {

@@ -12,6 +12,7 @@ import {
 	type Prediction,
 } from "@/lib/prediction-api";
 import { PredictionTilePreview } from "./PredictionTilePreview";
+import { VerdictCard } from "./VerdictCard";
 
 type DetectionDetailSheetProps = {
 	prediction: Prediction | null;
@@ -39,6 +40,8 @@ export function DetectionDetailSheet({
 				{prediction ? (
 					<div className="flex flex-col gap-4 px-4 pb-4">
 						<PredictionTilePreview prediction={prediction} />
+
+						<VerdictCard compliance={prediction.compliance} />
 
 						<div className="flex flex-wrap gap-2">
 							<Badge>{formatConfidence(prediction.confidence)}</Badge>
