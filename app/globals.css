@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "leaflet/dist/leaflet.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -33,6 +33,12 @@
     --confidence-medium: oklch(0.769 0.188 70.08);
     --confidence-low: oklch(0.552 0.016 285.938);
     --detection-fill: oklch(0.577 0.245 27.325 / 12%);
+    --command-canvas: oklch(0.11 0.018 151);
+    --command-surface: oklch(0.16 0.018 151);
+    --command-elevated: oklch(0.22 0.022 151);
+    --command-foreground: oklch(0.97 0.012 100);
+    --command-muted: oklch(0.76 0.018 120);
+    --command-border: oklch(0.94 0.02 110 / 18%);
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.141 0.005 285.823);
@@ -72,6 +78,12 @@
     --confidence-medium: oklch(0.837 0.164 84.429);
     --confidence-low: oklch(0.705 0.015 286.067);
     --detection-fill: oklch(0.704 0.191 22.216 / 18%);
+    --command-canvas: oklch(0.09 0.014 151);
+    --command-surface: oklch(0.14 0.016 151);
+    --command-elevated: oklch(0.2 0.018 151);
+    --command-foreground: oklch(0.97 0.012 100);
+    --command-muted: oklch(0.76 0.018 120);
+    --command-border: oklch(0.94 0.02 110 / 18%);
     --sidebar: oklch(0.21 0.006 285.885);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.723 0.219 149.579);
@@ -102,6 +114,13 @@
     --color-confidence-medium: var(--confidence-medium);
     --color-confidence-low: var(--confidence-low);
     --color-detection-fill: var(--detection-fill);
+    --color-command-border: var(--command-border);
+    --color-command-muted: var(--command-muted);
+    --color-command-foreground: var(--command-foreground);
+    --color-command-elevated: var(--command-elevated);
+    --color-command-surface: var(--command-surface);
+    --color-command-canvas: var(--command-canvas);
+    --background-image-command-vignette: radial-gradient(circle at center, transparent 30%, oklch(0.06 0.01 151 / 58%) 100%);
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
@@ -145,6 +164,67 @@
 }
 
 @layer components {
+  .satellite-evidence-enhanced {
+    filter: url("#satellite-evidence-sharpen") contrast(1.12) saturate(1.08);
+  }
+
+  .satellite-map {
+    position: absolute !important;
+    inset: 0 !important;
+  }
+
+  .satellite-map .maplibregl-canvas {
+    outline: none;
+  }
+
+  .satellite-map .maplibregl-ctrl-group,
+  .satellite-map .maplibregl-ctrl-attrib {
+    border: 1px solid var(--command-border);
+    background: color-mix(in oklch, var(--command-surface) 88%, transparent);
+    color: var(--command-foreground);
+    backdrop-filter: blur(12px);
+  }
+
+  .satellite-map .maplibregl-ctrl button .maplibregl-ctrl-icon {
+    filter: invert(1);
+  }
+
+  .satellite-map .maplibregl-ctrl-attrib a {
+    color: var(--command-foreground);
+  }
+
+  body:has([data-slot="dialog-content"]) .satellite-map .maplibregl-control-container {
+    visibility: hidden;
+  }
+
+  @media (max-width: 40rem) {
+    .satellite-map .maplibregl-ctrl-bottom-right {
+      bottom: 20.5rem !important;
+      right: 0.5rem !important;
+    }
+
+    .satellite-map .maplibregl-ctrl-group {
+      display: none !important;
+    }
+  }
+
+  .command-scan-line {
+    position: absolute;
+    inset-inline: 0;
+    height: 2px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    box-shadow: 0 0 24px var(--primary);
+    animation: command-scan 2.8s ease-in-out infinite;
+  }
+
+  @keyframes command-scan {
+    0% { top: 12%; opacity: 0; }
+    12% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { top: 88%; opacity: 0; }
+  }
+
   .kiln-map {
     height: 100%;
     width: 100%;
