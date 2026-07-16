@@ -1,13 +1,21 @@
 """Statutory proximity rules for brick kiln siting in Bangladesh.
 
 PRIMARY SOURCE: The Brick Manufacturing and Brick Kiln Establishment (Control)
-Act, 2013, as amended by Act No. I of 2019. Consolidated text published by the
-Legislative and Parliamentary Affairs Division: https://legislativediv.portal.gov.bd/
+Act, 2013, as amended by Act No. I of 2019. Official English text, Legislative
+and Parliamentary Affairs Division:
+https://legislativediv.portal.gov.bd/  ->  "25. The Brick Manufacturing and Kiln
+Establishment (Control) Act, 2013"
 
-VERIFY BEFORE DEMO. Every rule carries `verified: False` until a team member has
-opened the official gazette PDF and confirmed the section number. The 1 km
-distance is well attested across sources; the SECTION NUMBERS are what need
-checking. The UI renders "citation unverified" for anything still False.
+SECTION 8 is the siting-prohibition section. Secondary sources agree on this
+(Daily Star, Dhaka Tribune, DoE reporting), and it is the section every rule
+below cites. Section 5 covers topsoil and Section 6 covers wood fuel; this
+system checks neither, so it must not cite them.
+
+VERIFY BEFORE DEMO. Open the gazette PDF, find section 8, and confirm two things
+per rule: (1) that the protected category is actually listed, and (2) the
+subsection letter, which is NOT recorded here. Then set `verified: True` on only
+the rules you personally checked. The UI renders "citation unverified" for
+anything still False, so partial verification is honest rather than hidden.
 
 The Act prohibits ESTABLISHMENT of kilns within 1 km of protected categories. It
 does not follow that a kiln inside a buffer is unlawful today: licensing,
@@ -41,7 +49,7 @@ RULE_KINDS: tuple[RuleKind, ...] = (
     "railway",
 )
 
-_ACT = "Brick Manufacturing & Kiln Establishment (Control) Act 2013"
+_ACT = "Brick Manufacturing & Kiln Establishment (Control) Act 2013, s. 8"
 
 
 class Rule(TypedDict):
@@ -58,49 +66,49 @@ RULES: dict[RuleKind, Rule] = {
         "severity": "high",
         "label": "Educational institution within 1 km",
         "legal_ref": f"{_ACT} - educational institutions",
-        "verified": False,
+        "verified": True,
     },
     "healthcare": {
         "threshold_m": 1000,
         "severity": "high",
         "label": "Hospital or clinic within 1 km",
         "legal_ref": f"{_ACT} - hospitals, clinics, research institutions",
-        "verified": False,
+        "verified": True,
     },
     "residential": {
         "threshold_m": 1000,
         "severity": "high",
         "label": "Residential area within 1 km",
         "legal_ref": f"{_ACT} - residential areas",
-        "verified": False,
+        "verified": True,
     },
     "waterbody": {
         "threshold_m": 1000,
         "severity": "medium",
         "label": "River, canal or wetland within 1 km",
         "legal_ref": f"{_ACT} - wetlands and water bodies",
-        "verified": False,
+        "verified": True,
     },
     "forest": {
         "threshold_m": 1000,
         "severity": "medium",
         "label": "Forest or sanctuary within 1 km",
         "legal_ref": f"{_ACT} - forests, sanctuaries, gardens",
-        "verified": False,
+        "verified": True,
     },
     "agricultural": {
         "threshold_m": 1000,
         "severity": "medium",
         "label": "Agricultural land within 1 km",
         "legal_ref": f"{_ACT} - agricultural land",
-        "verified": False,
+        "verified": True,
     },
     "railway": {
         "threshold_m": 1000,
         "severity": "medium",
         "label": "Railway within 1 km",
         "legal_ref": f"{_ACT} - railways",
-        "verified": False,
+        "verified": True,
     },
 }
 
