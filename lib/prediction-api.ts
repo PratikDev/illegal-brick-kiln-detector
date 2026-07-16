@@ -1,3 +1,5 @@
+import { parseCompliance, type ComplianceResult } from "@/lib/compliance";
+
 export type PredictionClassName = "CFCBK" | "FCBK" | "Zigzag";
 
 export type PredictionBox = {
@@ -15,6 +17,8 @@ export type Prediction = {
 	tileUrl: string;
 	className?: PredictionClassName;
 	box?: PredictionBox;
+	/** Absent on uploads: their coordinates come from a reference tile. */
+	compliance?: ComplianceResult;
 };
 
 export type PredictResponse = {
@@ -159,6 +163,7 @@ function parsePrediction(value: unknown): Prediction {
 
 	const prediction = value as RawPrediction;
 	const className = parseClassName(prediction.className);
+	const compliance = parseCompliance(prediction.compliance);
 
 	return {
 		id: requireString(prediction.id, "prediction.id"),
@@ -172,6 +177,7 @@ function parsePrediction(value: unknown): Prediction {
 		tileUrl: requireString(prediction.tileUrl, "prediction.tileUrl"),
 		...(className ? { className } : {}),
 		...(prediction.box ? { box: parseBox(prediction.box) } : {}),
+		...(compliance ? { compliance } : {}),
 	};
 }
 

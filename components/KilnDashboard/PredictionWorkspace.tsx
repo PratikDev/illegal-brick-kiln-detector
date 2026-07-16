@@ -32,6 +32,8 @@ import { DetectionDetailSheet } from "./DetectionDetailSheet";
 import { PredictionList } from "./PredictionList";
 import { PredictionSummary } from "./PredictionSummary";
 import { usePredictionWorkspace } from "./use-prediction-workspace";
+import { useWorklist } from "./use-worklist";
+import { WorklistFilters } from "./WorklistFilters";
 
 const KilnMap = dynamic(
 	() => import("@/components/KilnMap").then((module) => module.KilnMap),
@@ -142,6 +144,8 @@ export function PredictionWorkspace({ region }: PredictionWorkspaceProps) {
 
 			<DetectionDetailSheet
 				prediction={workspace.selectedPrediction}
+				district={region.slug}
+				generatedAt={workspace.response?.generatedAt ?? ""}
 				onOpenChange={(open) => {
 					if (!open) {
 						workspace.clearSelectedPrediction();
@@ -167,21 +171,35 @@ function PredictionReviewPanel({
 	summary: PredictionSummaryData;
 	onSelectPrediction: (prediction: Prediction) => void;
 }) {
+	const worklist = useWorklist(predictions);
+
 	return (
 		<>
-			<PredictionSummary summary={summary} />
+			<PredictionSummary summary={summary} compliance={worklist.summary} />
 			<div className="flex flex-col gap-3">
 				<div>
-					<h3 className="font-heading text-base font-medium">Detections</h3>
+					<h3 className="font-heading text-base font-medium">Review queue</h3>
 					<p className="text-sm text-muted-foreground">
-						Select a detection to inspect tile evidence.
+						Ranked by enforcement priority. Select a detection to inspect tile
+						evidence.
 					</p>
 				</div>
-				<PredictionList
-					predictions={predictions}
-					selectedPredictionId={selectedPredictionId}
-					onSelectPrediction={onSelectPrediction}
+				<WorklistFilters
+					options={worklist.filterOptions}
+					value={worklist.filter}
+					onValueChange={worklist.setFilter}
 				/>
+				{worklist.visiblePredictions.length > 0 ? (
+					<PredictionList
+						predictions={worklist.visiblePredictions}
+						selectedPredictionId={selectedPredictionId}
+						onSelectPrediction={onSelectPrediction}
+					/>
+				) : (
+					<p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+						No detections match this filter. Clear it to see the full queue.
+					</p>
+				)}
 			</div>
 		</>
 	);

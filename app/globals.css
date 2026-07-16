@@ -33,6 +33,10 @@
     --confidence-medium: oklch(0.769 0.188 70.08);
     --confidence-low: oklch(0.552 0.016 285.938);
     --detection-fill: oklch(0.577 0.245 27.325 / 12%);
+    --compliance-flagged: var(--destructive);
+    --compliance-review: var(--confidence-medium);
+    --compliance-neutral: var(--muted-foreground);
+    --compliance-buffer-fill: oklch(0.577 0.245 27.325 / 8%);
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.141 0.005 285.823);
@@ -72,6 +76,10 @@
     --confidence-medium: oklch(0.837 0.164 84.429);
     --confidence-low: oklch(0.705 0.015 286.067);
     --detection-fill: oklch(0.704 0.191 22.216 / 18%);
+    --compliance-flagged: var(--destructive);
+    --compliance-review: var(--confidence-medium);
+    --compliance-neutral: var(--muted-foreground);
+    --compliance-buffer-fill: oklch(0.704 0.191 22.216 / 12%);
     --sidebar: oklch(0.21 0.006 285.885);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.723 0.219 149.579);
@@ -102,6 +110,10 @@
     --color-confidence-medium: var(--confidence-medium);
     --color-confidence-low: var(--confidence-low);
     --color-detection-fill: var(--detection-fill);
+    --color-compliance-flagged: var(--compliance-flagged);
+    --color-compliance-review: var(--compliance-review);
+    --color-compliance-neutral: var(--compliance-neutral);
+    --color-compliance-buffer-fill: var(--compliance-buffer-fill);
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
@@ -176,5 +188,25 @@
   .kiln-map-marker-selected {
     filter: drop-shadow(0 0 0.45rem var(--ring));
     stroke: var(--foreground);
+  }
+
+  .kiln-map-buffer {
+    stroke: var(--compliance-neutral);
+    fill: transparent;
+  }
+
+  .kiln-map-buffer-flagged {
+    stroke: var(--compliance-flagged);
+    fill: var(--compliance-buffer-fill);
+  }
+
+  .kiln-map-violation-high {
+    stroke: var(--compliance-flagged);
+    fill: var(--compliance-flagged);
+  }
+
+  .kiln-map-violation-medium {
+    stroke: var(--compliance-review);
+    fill: var(--compliance-review);
   }
 }

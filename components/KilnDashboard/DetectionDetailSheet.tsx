@@ -11,15 +11,21 @@ import {
 	formatConfidence,
 	type Prediction,
 } from "@/lib/prediction-api";
+import { DossierPanel } from "./DossierPanel";
 import { PredictionTilePreview } from "./PredictionTilePreview";
+import { VerdictCard } from "./VerdictCard";
 
 type DetectionDetailSheetProps = {
 	prediction: Prediction | null;
+	district: string;
+	generatedAt: string;
 	onOpenChange: (open: boolean) => void;
 };
 
 export function DetectionDetailSheet({
 	prediction,
+	district,
+	generatedAt,
 	onOpenChange,
 }: DetectionDetailSheetProps) {
 	const boxLabel = prediction?.box
@@ -39,6 +45,15 @@ export function DetectionDetailSheet({
 				{prediction ? (
 					<div className="flex flex-col gap-4 px-4 pb-4">
 						<PredictionTilePreview prediction={prediction} />
+
+						<VerdictCard compliance={prediction.compliance} />
+
+						<DossierPanel
+							key={prediction.id}
+							prediction={prediction}
+							district={district}
+							generatedAt={generatedAt}
+						/>
 
 						<div className="flex flex-wrap gap-2">
 							<Badge>{formatConfidence(prediction.confidence)}</Badge>

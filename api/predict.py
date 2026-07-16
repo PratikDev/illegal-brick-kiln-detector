@@ -4,6 +4,7 @@ import base64
 import json
 import math
 import os
+import sys
 import time
 import urllib.parse
 import urllib.request
@@ -16,6 +17,13 @@ from typing import Any
 
 import numpy as np
 from PIL import Image
+
+# Vercel loads this file by path, which does not put api/ on sys.path the way
+# running it as a script does. Without this the sibling import works locally and
+# fails on deploy.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from compliance import get_engine  # noqa: E402
 
 
 SUPPORTED_REGIONS = {
@@ -324,6 +332,30 @@ def _obb_points(detection: dict[str, Any]) -> list[list[float]]:
     ]
 
 
+def _attach_compliance(
+    predictions: list[dict[str, Any]], region: str
+) -> list[dict[str, Any]]:
+    """Additive and non-fatal. Any failure leaves predictions untouched."""
+    try:
+        engine = get_engine(region)
+        if engine is None:
+            return predictions
+
+        for prediction in predictions:
+            try:
+                prediction["compliance"] = engine.evaluate(
+                    float(prediction["lat"]),
+                    float(prediction["lon"]),
+                    float(prediction.get("confidence", 0.0)),
+                )
+            except Exception as exc:
+                print(f"compliance skipped for {prediction.get('id')}: {exc}")
+    except Exception as exc:
+        print(f"compliance engine unavailable for {region}: {exc}")
+
+    return predictions
+
+
 def predict_region(
     region: str,
     confidence: float,
@@ -344,7 +376,7 @@ def predict_region(
     return {
         "region": region,
         "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "predictions": predictions[:MAX_DETECTIONS],
+        "predictions": _attach_compliance(predictions[:MAX_DETECTIONS], region),
     }
 
 
