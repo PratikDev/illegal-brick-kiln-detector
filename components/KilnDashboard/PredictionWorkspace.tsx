@@ -144,6 +144,8 @@ export function PredictionWorkspace({ region }: PredictionWorkspaceProps) {
 
 			<DetectionDetailSheet
 				prediction={workspace.selectedPrediction}
+				district={region.slug}
+				generatedAt={workspace.response?.generatedAt ?? ""}
 				onOpenChange={(open) => {
 					if (!open) {
 						workspace.clearSelectedPrediction();
