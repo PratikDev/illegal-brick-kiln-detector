@@ -1,5 +1,5 @@
-import { KilnDashboard } from "@/components/KilnDashboard";
+import { CommandCenter } from "@/components/CommandCenter";
 
 export default function Home() {
-	return <KilnDashboard />;
+	return <CommandCenter />;
 }

@@ -1,0 +1,6 @@
+torch==2.13.0
+torchvision==0.28.0
+ultralytics==8.4.96
+pyarrow==20.0.0
+huggingface-hub==0.33.4
+PyYAML==6.0.3

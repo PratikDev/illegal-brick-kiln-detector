@@ -2,15 +2,20 @@ import { RiImageLine } from "@remixicon/react";
 import Image from "next/image";
 
 import { Empty, EmptyDescription, EmptyMedia } from "@/components/ui/empty";
+import { cn } from "@/lib/utils";
 import type { Prediction } from "@/lib/prediction-api";
 import { getDisplayTileUrl } from "@/lib/prediction-api";
 
 type PredictionTilePreviewProps = {
 	prediction: Prediction;
+	priority?: boolean;
+	enhanced?: boolean;
 };
 
 export function PredictionTilePreview({
 	prediction,
+	priority = false,
+	enhanced = true,
 }: PredictionTilePreviewProps) {
 	const tileUrl = getDisplayTileUrl(prediction.tileUrl);
 	const viewBoxSize = prediction.box?.imageSize ?? 256;
@@ -26,8 +31,9 @@ export function PredictionTilePreview({
 					alt={`Satellite tile for detection ${prediction.id}`}
 					fill
 					unoptimized
+					priority={priority}
 					sizes="(max-width: 768px) 100vw, 384px"
-					className="object-cover"
+					className={cn("object-cover", enhanced && "satellite-evidence-enhanced")}
 				/>
 			) : (
 				<Empty className="size-full rounded-none border-0">

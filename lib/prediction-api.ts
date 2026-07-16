@@ -21,6 +21,16 @@ export type PredictResponse = {
 	region: string;
 	generatedAt: string;
 	predictions: Prediction[];
+	inference?: InferenceMetadata;
+};
+
+export type InferenceMetadata = {
+	mode: "uploaded-image" | "seeded-region";
+	runtime: string;
+	model: string;
+	modelFile: string;
+	inputSize: number;
+	processingMs: number;
 };
 
 export type PredictionSummary = {
@@ -51,9 +61,11 @@ export async function fetchRegionPredictions(
 export async function predictUploadedImage({
 	regionSlug,
 	imageDataUrl,
+	confidence = 0.35,
 }: {
 	regionSlug: string;
 	imageDataUrl: string;
+	confidence?: number;
 }): Promise<PredictResponse> {
 	const response = await fetch("/predict", {
 		method: "POST",
@@ -61,6 +73,7 @@ export async function predictUploadedImage({
 		body: JSON.stringify({
 			region: regionSlug,
 			imageDataUrl,
+			confidence,
 		}),
 	});
 
@@ -69,7 +82,14 @@ export async function predictUploadedImage({
 	}
 
 	const data: unknown = await response.json();
-	return parsePredictResponse(data);
+	const result = parsePredictResponse(data);
+	return {
+		...result,
+		predictions: result.predictions.map((prediction) => ({
+			...prediction,
+			tileUrl: imageDataUrl,
+		})),
+	};
 }
 
 export function summarizePredictions(
@@ -145,10 +165,32 @@ function parsePredictResponse(data: unknown): PredictResponse {
 		throw new Error("Prediction response has invalid metadata");
 	}
 
+	const inference = parseInferenceMetadata(data.inference);
+
 	return {
 		region: data.region,
 		generatedAt: data.generatedAt,
 		predictions: data.predictions.map(parsePrediction),
+		...(inference ? { inference } : {}),
+	};
+}
+
+function parseInferenceMetadata(value: unknown): InferenceMetadata | null {
+	if (!isRecord(value)) {
+		return null;
+	}
+
+	if (value.mode !== "uploaded-image" && value.mode !== "seeded-region") {
+		throw new Error("Prediction response has an invalid inference mode");
+	}
+
+	return {
+		mode: value.mode,
+		runtime: requireString(value.runtime, "inference.runtime"),
+		model: requireString(value.model, "inference.model"),
+		modelFile: requireString(value.modelFile, "inference.modelFile"),
+		inputSize: requireNumber(value.inputSize, "inference.inputSize"),
+		processingMs: requireNumber(value.processingMs, "inference.processingMs"),
 	};
 }
 

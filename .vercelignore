@@ -1,0 +1,16 @@
+# Local training and documentation are not required by the deployed function.
+ml/
+scripts/
+docs/
+output/
+.ml-data/
+.ml-runs/
+.venv/
+**/__pycache__/**
+**/*.py[cod]
+
+# Keep model/best.tflite and model/tiles.json for real LiteRT inference.
+model/*.pt
+model/*.ipynb
+model/tiles.example.json
+model/MODEL_EXPORT.md

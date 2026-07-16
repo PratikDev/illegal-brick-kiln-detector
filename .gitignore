@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/.venv
 /.pnp
 .pnp.*
 .yarn/*
@@ -12,6 +13,13 @@
 
 # testing
 /coverage
+
+# local ML datasets and training artifacts
+/.ml-data
+/.ml-runs
+/yolo*-obb.pt
+__pycache__/
+*.py[cod]
 
 # next.js
 /.next/
